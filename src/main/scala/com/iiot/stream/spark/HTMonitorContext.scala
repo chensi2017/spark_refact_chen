@@ -30,7 +30,6 @@ object HTMonitorContext {
 
     //转换流
     val jsonDStream:DStream[DPUnion] = HTInputDStreamFormat.inputDStreamFormatWithDN(stream)
-//    jsonDStream.cache()
 
     //统计
     val statistics=new HTStateStatisticsFewerReduceextends(redisBro)

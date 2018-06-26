@@ -7,7 +7,7 @@ import org.apache.spark.SparkConf
 
 object HTMonitorTool {
   def initSparkConf(configs: Properties): SparkConf = {
-    new SparkConf().setAppName("RealTimeCountAndMonitor")
+    new SparkConf().setAppName("RealTimeCountAndMonitor").setMaster("local[4]")
       .set("spark.cores.max", configs.getProperty("spark.cores.max"))
       .set("spark.executor.cores", configs.getProperty("spark.executor.cores"))
       .set("spark.network.timeout", configs.getProperty("spark.network.timeout"))

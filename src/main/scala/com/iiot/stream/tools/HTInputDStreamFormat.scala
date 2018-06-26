@@ -1,19 +1,9 @@
 package com.iiot.stream.tools
 
-import java.io.IOException
-
-import com.alibaba.fastjson.{JSON, JSONObject}
-import com.htiiot.store.model.Metric
-import com.iiot.stream.base._
-import com.iiot.stream.bean.{DPList, DPListWithDN, DPUnion, DataPoint}
-import org.apache.http.HttpEntity
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
-import org.apache.http.client.{ClientProtocolException, HttpResponseException}
-import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
-import org.apache.http.util.EntityUtils
+import com.alibaba.fastjson.JSON
+import com.iiot.stream.bean.{DPList, DPListWithDN, DPUnion}
 import org.apache.log4j.Logger
 import org.apache.spark.streaming.dstream.DStream
-import redis.clients.jedis.Jedis
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -31,8 +21,28 @@ object HTInputDStreamFormat {
     resultJson
   }
 
-  def dataTransformWithDN(x: DPListWithDN): ArrayBuffer[DPUnion]={
+  def inputDStreamFormatWithDNFilter(stream: DStream[(String, String)]): DStream[DPUnion] = {
+    val resultJson = stream.map(x => dataTransformWithDN(
+      try {
+        JSON.parseObject(x._2, classOf[DPListWithDN])
+      }catch {
+        case e:Exception=>null
+      }
+    )).flatMap(x  => x).filter(x=>{
+      if(x!=null)
+        true
+      else
+        false
+    })
+    resultJson.cache()
+    resultJson
+  }
+
+  def dataTransformWithDN(x: DPListWithDN): ArrayBuffer[DPUnion] = {
     //    logger.info("the raw string is " + x.toString)
+    if(x==null){
+      return null;
+    }
     var result = ArrayBuffer[DPUnion]()
     try {
       var ts: Long = x.getTs
@@ -66,15 +76,15 @@ object HTInputDStreamFormat {
           result += dp
         }
       }
-    }catch {
-      case e:NullPointerException =>{
-        logger.error("NullPointer Error"+e.getMessage)
+    } catch {
+      case e: NullPointerException => {
+        logger.error("NullPointer Error" + e.getMessage)
       }
-      case e:NumberFormatException =>{
-        logger.error("NumberFormat Error"+ e.getMessage)
+      case e: NumberFormatException => {
+        logger.error("NumberFormat Error" + e.getMessage)
       }
-      case e:Exception =>{
-        logger.error("Unknown Error"+ e.getMessage)
+      case e: Exception => {
+        logger.error("Unknown Error" + e.getMessage)
       }
     }
     //    logger.info("the result string is :" + result)
@@ -83,7 +93,7 @@ object HTInputDStreamFormat {
   }
 
   def inputDStreamFormat(stream: DStream[(String, String)]): DStream[DPUnion] = {
-    val resultJson = stream.map(x => JSON.parseObject(x._2,classOf[DPList]))
+    val resultJson = stream.map(x => JSON.parseObject(x._2, classOf[DPList]))
       .map(x => dataTransform(x))
       .flatMap(x => x)
     resultJson
@@ -99,7 +109,7 @@ object HTInputDStreamFormat {
     var dn: String = "0"
     var compId = "0"
     var thingId = "0"
-    for (metric <- data){
+    for (metric <- data) {
       if (metric.getTs.toString.nonEmpty) {
         ts = metric.getTs
       }

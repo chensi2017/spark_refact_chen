@@ -181,10 +181,11 @@ public class DataStreamConsumerRefact {
         DeviceNumber deviceNumber = point.getDeviceNumber();
         long ts = point.getTs();
         Metric metric = point.getMetric();
-        String metricName = metric.getName();
+//        String metricName = metric.getName();
         double metricValue = metric.getValue().doubleValue();
         Set<String> set = new HashSet();
         List<ThingBullet> list = new ArrayList();
+
         //acquire alarm threshold
         String str = ((MetricImpl)point.getMetric()).getThreshold();
 

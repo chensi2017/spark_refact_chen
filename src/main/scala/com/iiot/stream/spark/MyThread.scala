@@ -40,6 +40,7 @@ override def run(){
           val deviceNumber = point.getDeviceNumber
           val ts = point.getTs
           val metricIdb = deviceNumber.getComponentId
+//          val metricIdb = deviceNumber.getComponentIdLong
           val bf = ByteBuffer.allocate(8)
           bf.put(metricIdb)
           bf.flip
