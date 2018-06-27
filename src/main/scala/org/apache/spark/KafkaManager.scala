@@ -6,8 +6,7 @@ import kafka.serializer.{Decoder, StringDecoder}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.kafka.KafkaCluster.LeaderOffset
-import org.apache.spark.streaming.kafka.{HasOffsetRanges, KafkaCluster, KafkaUtils}
-
+import org.apache.spark.streaming.kafka.{HTKafkaUtils, HasOffsetRanges, KafkaCluster}
 import scala.reflect.ClassTag
 import scala.util.control.Breaks.breakable
 
@@ -35,9 +34,7 @@ class KafkaManager(val kafkaParams:Map[String,String]) extends Serializable {
       if (consumerOffsetsE.isLeft)
         throw new SparkException(s"get kafka consumer offsets failed: ${consumerOffsetsE.left.get}")
       val consumerOffsets = consumerOffsetsE.right.get
-//      KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder, (String, String)](
-//        ssc, kafkaParams, consumerOffsets, (mmd: MessageAndMetadata[String, String]) => (mmd.key, mmd.message))
-      KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder, (String, String)](
+      HTKafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder, (String, String)](
         ssc, kafkaParams, consumerOffsets, (mmd: MessageAndMetadata[String, String]) => (mmd.key, mmd.message))
     }
     messages
