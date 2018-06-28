@@ -6,7 +6,7 @@ class DPUnion  extends Serializable {
   var _dn: DeviceNumber = _
   var _ts: Long =0L
   var _tid: String = ""
-  var _metricId: String = ""
+  var _metricId: Long = _
   var _thingId: String = ""
 
   var _value:String= ""
@@ -48,8 +48,8 @@ class DPUnion  extends Serializable {
   }
 
 
-  def getMetricId: String = _metricId
-  def setMetricId(value: String): Unit = {
+  def getMetricId: Long = _metricId
+  def setMetricId(value: Long): Unit = {
     _metricId = value
   }
 
@@ -59,4 +59,6 @@ class DPUnion  extends Serializable {
     _thingId = value
   }
 
+
+  override def toString = "DPUnion----()"+_metricId
 }

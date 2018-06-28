@@ -22,7 +22,7 @@ R: ClassTag](
               val HTfromOffsets: Map[TopicAndPartition, Long],
               messageHandler: MessageAndMetadata[K, V] => R
 ) extends DirectKafkaInputDStream[K, V, U, T, R](ssc_, HTkafkaParams , HTfromOffsets, messageHandler) {
-  private val logger = Logger.getLogger("HTDirectKafkaInputDStream")
+  @transient private val logger = Logger.getLogger("HTDirectKafkaInputDStream")
   logger.setLevel(Level.INFO)
   private val kafkaBrokerList:String = HTkafkaParams.get("metadata.broker.list").get
   override def compute(validTime: Time) : Option[KafkaRDD[K, V, U, T, R]] = {
