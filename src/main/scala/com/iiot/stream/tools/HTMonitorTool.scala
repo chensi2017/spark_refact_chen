@@ -7,7 +7,8 @@ import org.apache.spark.SparkConf
 
 object HTMonitorTool {
   def initSparkConf(configs: Properties): SparkConf = {
-    new SparkConf().setAppName("RealTimeCountAndMonitor").setMaster("local[4]")
+    new SparkConf().setAppName("RealTimeCountAndMonitor")
+//      .setMaster("local[4]")
       .set("spark.cores.max", configs.getProperty("spark.cores.max"))
       .set("spark.executor.cores", configs.getProperty("spark.executor.cores"))
       .set("spark.network.timeout", configs.getProperty("spark.network.timeout"))
@@ -19,13 +20,13 @@ object HTMonitorTool {
       .set("spark.locality.wait.node",configs.getProperty("spark.locality.wait.node"))
 //      .set("spark.locality.wait",configs.getProperty("spark.locality.wait"))
       .set("spark.streaming.kafka.maxRatePerPartition", configs.getProperty("spark.streaming.kafka.maxRatePerPartition"))
-      .set("spark.kryo.registrationRequired", "true")
+      .set("spark.kryo.registrationRequired", "false")
 //      .set("spark.executor.extraJavaOptions","-XX:+UseG1GC -XX:+PrintGCDetails -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps") //打印GC信息
       .set("spark.streaming.stopGracefullyOnShutdown","true") //当执行kill命令优雅的关闭job
       //      .set("spark.shuffle.service.enabled","true")
       //      .set("spa
       // rk.dynamicAllocation.enabled","true")//动态分配executor
-      .registerKryoClasses(Array(classOf[DPList], classOf[DPListWithDN],
+      .registerKryoClasses(Array(classOf[DPList], classOf[DPListWithDN],classOf[Array[DPUnion]],
       classOf[DPUnion],classOf[MetricWithDN],classOf[com.htiiot.resources.utils.DeviceNumber],classOf[Properties]))
   }
   def initKafkaParamters(configs: Properties):Map[String,String]={

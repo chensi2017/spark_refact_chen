@@ -17,7 +17,6 @@ object HTInputDStreamFormat {
   def inputDStreamFormatWithDN(stream: DStream[(String, String)]): DStream[DPUnion] = {
     val resultJson = stream.map(x => dataTransformWithDN(JSON.parseObject(x._2,classOf[DPListWithDN])))
       .flatMap(x => x)
-    resultJson.cache()
     resultJson
   }
 

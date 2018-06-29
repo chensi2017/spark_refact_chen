@@ -4,7 +4,7 @@ redis阈值格式:key->event_<metricId>_<metricName> value->[{"id":962,"op":"=",
 
 
 
-============================================================================================
+==============================================================================================
 需求：
 所有独立的测点数
 按日期统计独立的测点数
@@ -13,9 +13,17 @@ redis阈值格式:key->event_<metricId>_<metricName> value->[{"id":962,"op":"=",
 按窗口统计所有独立的测点数
 实现方法：
 使用mapWithState算子进行去重和状态维护
-输入:(metricId:Long,(date:Long,tid:String))
+输入:(metricId:Long,(date:Long,tid:String,count:Int))
 State:(tid:String,times:Long,date:Int)
 输出:(metricId:Long,tid:String,times:Long,firstAppear:Boolean)
---------------------------------------------------------------
+Redis中存储形式{
+    所有独立测点数=>key: htstream:unique:dp:total
+    按日期统计独立的测点数=>key: htstream:unique:dp:by:date filed: <20180629>
+    按租户和日期统计独立的测点数=>key: htstream:unique:dp:by:tenantid:date filed: <20180629:tid>
+}
+------------------------------------------------------------------------------------------------
 窗口操作
-输出:(metricId:Long,tid:String,firstAppear:Boolean)
+Redis中存储形式{
+    按时间窗口和租户统计独立的测点数=>key: htstream:unique:dp:by:tenantid:window filed: <tid>
+    按窗口统计所有独立的测点数=>key: htstream:unique:dp:total:by:window
+}
