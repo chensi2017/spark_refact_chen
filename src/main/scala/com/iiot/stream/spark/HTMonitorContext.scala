@@ -1,11 +1,11 @@
 package com.iiot.stream.spark
 
 import com.iiot.stream.bean.DPUnion
-import com.iiot.stream.tools.{HTInputDStreamFormat, HTMonitorTool, ZookeeperClient}
+import com.iiot.stream.tools.{HTInputDStreamFormat, ZookeeperClient}
 import org.apache.spark.KafkaManager
-import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream.DStream
+import org.apache.spark.streaming.rdd.HTMonitorTool
 
 object HTMonitorContext {
   val zkClient = new ZookeeperClient
@@ -32,28 +32,44 @@ object HTMonitorContext {
 
     //转换流
     val jsonDStream:DStream[DPUnion] = HTInputDStreamFormat.inputDStreamFormatWithDN(stream)
+    jsonDStream.cache()
+
     val metricStream = jsonDStream.map(x=>(x.getMetricId,(x.getTs,x.getTid,1)))
+    metricStream.cache()
+    metricStream.foreachRDD(rdd=>{
+      rdd.sparkContext.setLocalProperty("spark.scheduler.pool", "pool_a")
+      rdd.foreachPartition(iter=>{
 
-    metricStream.persist(StorageLevel.MEMORY_ONLY_SER)
+      })
+    }
+    )
 
-    //独立测点计算
+    metricStream.foreachRDD(rdd=>{
+      rdd.sparkContext.setLocalProperty("spark.scheduler.pool", "pool_b")
+      rdd.foreachPartition(iter=>{
+
+      })
+    }
+    )
+
+
+    /*//独立测点计算
     val dpCal = new HTUniqueDpCal(redisBro)
     dpCal.uniqueDpCal(metricStream)
 
     //窗口计算
     val dpWindowCal = new HTUniqueDpWindowCal(redisBro)
-    dpWindowCal.uniqueDpWindowCal(metricStream)
+    dpWindowCal.uniqueDpWindowCalNew(metricStream)*/
 
     /*//统计
     val statistics=new HTStateStatisticsFewerReduceextends(redisBro)
     statistics.DPStatistics(jsonDStream)
-    //statistics.distinctDnThingID(jsonDStream)
 
     //监控
     val monitorOperation =new HTMonitorOperation(sparkBro)
-    monitorOperation.monitor(jsonDStream)
+    monitorOperation.monitor(jsonDStream)*/
 
-    //提交offset
+    /*//提交offset
     stream.foreachRDD(rdd=>{
       println("正在提交offset...............")
       km.updateOffsets(rdd)

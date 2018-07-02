@@ -50,8 +50,10 @@ shadowJar{
 }
 
 repositories{
-    maven { url 'http://124.207.207.21:62125/repository/maven-central/' }
-    maven { url 'http://124.207.207.21:62125/repository/maven-snapshots/' }
+//    maven { url 'http://124.207.207.21:62125/repository/maven-central/' }
+//    maven { url 'http://124.207.207.21:62125/repository/maven-snapshots/' }
+    maven { url 'http://192.168.0.76:8081/repository/maven-central/' }
+    maven { url 'http://192.168.0.76:8081/repository/maven-snapshots/' }
     maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url "http://repo.maven.apache.org/maven2" }
     mavenCentral()
