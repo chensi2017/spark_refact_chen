@@ -6,6 +6,7 @@ import com.iiot.stream.base.RedisOperation
 import com.iiot.stream.tools.DateUtils
 import org.apache.log4j.Logger
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Seconds, State, StateSpec}
 import org.apache.spark.streaming.dstream.DStream
 import redis.clients.jedis.{Jedis, Pipeline}
@@ -50,10 +51,10 @@ class HTUniqueDpCal(redisProBro: Broadcast[Properties]) extends Serializable {
     }
   }
 
-  def uniqueDpCal(metricStream: DStream[(Long, (Long, String, Int))]) = {
-    val resultStream = metricStream.mapWithState(StateSpec.function(mapfun)).checkpoint(Seconds(5)).checkpoint(Seconds(1000))
+  def uniqueDpCal(metricStream: DStream[(Long, (Long, String, Int))],initRDD:RDD[(Long,(String,Long,Int))]) = {
+    val resultStream = metricStream.mapWithState(StateSpec.function(mapfun).initialState(initRDD)).checkpoint(Seconds(100))
     resultStream.foreachRDD(rdd => {
-      rdd.sparkContext.setLocalProperty("spark.scheduler.pool", "pool_b")
+//      rdd.sparkContext.setLocalProperty("spark.scheduler.pool", "pool_b")
       rdd.foreachPartition(iter => {
         var uniqueMetricAll = 0l
         var uniqueMetricToday = 0l

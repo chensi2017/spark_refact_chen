@@ -137,7 +137,7 @@ class HTStateStatisticsFewerReduceextends(redisProBro:Broadcast[Properties]) ext
 
   def DPStatistics(jsonDStream: DStream[DPUnion]): Unit = {
     jsonDStream.foreachRDD(rdd => {
-      rdd.sparkContext.setLocalProperty("spark.scheduler.pool","pool_c")
+//      rdd.sparkContext.setLocalProperty("spark.scheduler.pool","pool_a")
       rdd.foreachPartition(foreachPartitionFunc)
   })
   }

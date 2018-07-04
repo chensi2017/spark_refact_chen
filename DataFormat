@@ -4,7 +4,7 @@ redis阈值格式:key->event_<metricId>_<metricName> value->[{"id":962,"op":"=",
 
 
 
-==============================================================================================
+=================================================================================================
 需求：
 所有独立的测点数
 按日期统计独立的测点数
@@ -12,7 +12,7 @@ redis阈值格式:key->event_<metricId>_<metricName> value->[{"id":962,"op":"=",
 按时间窗口和租户统计独立的测点数
 按窗口统计所有独立的测点数
 实现方法：
-使用mapWithState算子进行去重和状态维护
+使用mapWithState算子进行去重和状态维护 k:Long S:(String,Long,Int) E:(Long,String,Long,Boolean)
 输入:(metricId:Long,(date:Long,tid:String,count:Int))
 State:(tid:String,times:Long,date:Int)
 输出:(metricId:Long,tid:String,times:Long,firstAppear:Boolean)
@@ -20,10 +20,14 @@ Redis中存储形式{
     所有独立测点数=>key: htstream:unique:dp:total
     按日期统计独立的测点数=>key: htstream:unique:dp:by:date filed: <20180629>
     按租户和日期统计独立的测点数=>key: htstream:unique:dp:by:tenantid:date filed: <20180629:tid>
+    del htstream:unique:dp:by:tenantid:date htstream:unique:dp:by:date htstream:unique:dp:by:tenantid:window htstream:unique:dp:total:by:window htstream:unique:dp:total
 }
-------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
 窗口操作
 Redis中存储形式{
     按时间窗口和租户统计独立的测点数=>key: htstream:unique:dp:by:tenantid:window filed: <tid>
     按窗口统计所有独立的测点数=>key: htstream:unique:dp:total:by:window
 }
+-------------------------------------------------------------------------------------------------
+状态恢复
+利用checkpoint存储的rdd数据恢复mapWithState算子中得状态数据(checkpoint addr:hdfs://192.168.0.78:8020/...)

@@ -94,7 +94,7 @@ class HTMonitorOperation(sparkProBro:Broadcast[Properties]) extends Serializable
 
   def monitor(jsonData: DStream[DPUnion]) = {
     jsonData.foreachRDD(rdd => {
-      rdd.sparkContext.setLocalProperty("spark.scheduler.pool","pool_d")
+//      rdd.sparkContext.setLocalProperty("spark.scheduler.pool","pool_b")
         rdd.foreachPartition(foreachPartitionFunc)
     })
   }

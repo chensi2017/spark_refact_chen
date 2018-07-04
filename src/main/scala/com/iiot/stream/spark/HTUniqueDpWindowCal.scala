@@ -69,9 +69,9 @@ class HTUniqueDpWindowCal(redisProBro:Broadcast[Properties]) extends Serializabl
 
   //use reduceByKeyAndWindow
   def uniqueDpWindowCalNew(metricStream:DStream[(Long,(Long,String,Int))]) ={
-    metricStream.reduceByKeyAndWindow(reduceFun,invFun,Seconds(30),Seconds(5),40,filter)
+    metricStream.reduceByKeyAndWindow(reduceFun,invFun,Seconds(30),Seconds(5),35,filter)
       .foreachRDD(rdd=>{
-        rdd.sparkContext.setLocalProperty("spark.scheduler.pool","pool_b")
+//        rdd.sparkContext.setLocalProperty("spark.scheduler.pool","pool_b")
         //calculate data
         rdd.foreachPartition(iter=>{
           var uniqueMetric = 0l
