@@ -8,7 +8,7 @@ import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.{KafkaManager, SparkConf}
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream.DStream
-import org.apache.spark.streaming.rdd.{HTMonitorTool, HTStateRddAquire}
+import org.apache.spark.streaming.rdd.{HTMonitorTool, HTStateRddAquireFromCheckPoint}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
@@ -61,8 +61,8 @@ object HTMonitorContext {
     var configs = zkClient.getAll(zk, "/conf_htiiot/spark_streamming")
     val ssc = new StreamingContext(HTMonitorTool.initSparkConf(configs),Duration(Integer.parseInt(configs.getProperty("duration.num"))))
 
-    //获取独立测点状态数据
-    val initRDD = new HTStateRddAquire().get[Long,(String,Long,Int),(Long,String,Long,Boolean)](checkpointAddr,ssc.sparkContext)
+    //获取独立测点历史状态数据
+    val initRDD = new HTStateRddAquireFromCheckPoint().get[Long,(String,Long,Int),(Long,String,Long,Boolean)](checkpointAddr,ssc.sparkContext)
     ssc.checkpoint(checkpointAddr)
 
     //获取配置进行广播
@@ -80,8 +80,8 @@ object HTMonitorContext {
     metricStream.cache()
 
       //统计
-//      val statistics=new HTStateStatisticsFewerReduceextends(redisBro)
-//      statistics.DPStatistics(jsonDStream)
+      val statistics=new HTStateStatisticsFewerReduceextends(redisBro)
+      statistics.DPStatistics(jsonDStream)
 
       //独立测点计算
       val dpCal = new HTUniqueDpCal(redisBro)
@@ -96,11 +96,11 @@ object HTMonitorContext {
 //      val monitorOperation =new HTMonitorOperation(sparkBro)
 //      monitorOperation.monitor(jsonDStream)
 
-      //提交offset
-//      stream.foreachRDD(rdd=>{
-//        println("正在提交offset...............")
-//        km.updateOffsets(rdd)
-//      })
+//      提交offset
+      stream.foreachRDD(rdd=>{
+        println("正在提交offset...............")
+        km.updateOffsets(rdd)
+      })
 
     ssc.start()
     ssc.awaitTermination()

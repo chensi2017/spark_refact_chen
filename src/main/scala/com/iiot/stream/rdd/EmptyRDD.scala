@@ -12,9 +12,7 @@ class EmptyRDD[K,V](sc:SparkContext) extends RDD[(K,V)](sc,Nil){
     Array().iterator
   }
 
-  override protected def getPartitions: Array[Partition] = {
-    Array()
-  }
+  override protected def getPartitions: Array[Partition] = Array.empty
 }
 object EmptyRDD{
   def get[K,V](sc:SparkContext)={

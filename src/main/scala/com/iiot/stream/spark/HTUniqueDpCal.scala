@@ -20,8 +20,7 @@ class HTUniqueDpCal(redisProBro: Broadcast[Properties]) extends Serializable {
     val newData = value.get
     if (state.exists()) {
       val stateData = state.get
-      if (DateUtils.isToday(newData._1)) {
-        //判断时间戳是否为今天
+      if (DateUtils.isToday(newData._1)) {//判断时间戳是否为今天
         var times = 0l
         if (DateUtils.formateTimeStamp(newData._1) == stateData._3) {
           //状态中的时间也是今天
@@ -31,6 +30,7 @@ class HTUniqueDpCal(redisProBro: Broadcast[Properties]) extends Serializable {
         } else {
           //状态中的时间不是今天=>相当于这条数据是今天第一次出现
           state.update(newData._2, 1l, DateUtils.formateTimeStamp(new Date().getTime))
+          times = 1l
         }
         (metricId, newData._2, times, false)
       } else {

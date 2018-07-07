@@ -17,23 +17,22 @@ object HTMonitorTool {
       .set("spark.defalut.parallelism", configs.getProperty("spark.defalut.parallelism"))
       .set("spark.streaming.blockInterval", configs.getProperty("spark.streaming.blockInterval"))
       .set("spark.serializer", configs.getProperty("spark.serializer"))
-        .set("spark.locality.wait.process",configs.getProperty("spark.locality.wait.process"))
+      .set("spark.locality.wait.process",configs.getProperty("spark.locality.wait.process"))
       .set("spark.locality.wait.node",configs.getProperty("spark.locality.wait.node"))
 //      .set("spark.locality.wait",configs.getProperty("spark.locality.wait"))
       .set("spark.streaming.kafka.maxRatePerPartition", configs.getProperty("spark.streaming.kafka.maxRatePerPartition"))
       .set("spark.kryo.registrationRequired", "false")
 //      .set("spark.executor.extraJavaOptions","-XX:+UseG1GC -XX:+PrintGCDetails -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps") //打印GC信息
       .set("spark.streaming.stopGracefullyOnShutdown","true") //当执行kill命令优雅的关闭job
-      //      .set("spark.shuffle.service.enabled","true")
-      //      .set("spa
-      // rk.dynamicAllocation.enabled","true")//动态分配executor
+//      .set("spark.shuffle.service.enabled","true")
+//      .set("spark.dynamicAllocation.enabled","true")//动态分配executor
 //      .set("spark.scheduler.mode","FAIR")
 //      .set("spark.streaming.concurrentJobs","5")
 //      .set("spark.scheduler.allocation.file", "/home/hdfs/chen/7_2/pool.xml")
 //      .set("spark.scheduler.allocation.file", "d:\\pool.xml")
       .registerKryoClasses(Array(classOf[DPList], classOf[DPListWithDN],classOf[Array[DPUnion]],
       classOf[DPUnion],classOf[MetricWithDN],classOf[com.htiiot.resources.utils.DeviceNumber],classOf[Properties],classOf[scala.collection.mutable.WrappedArray.ofRef[_]],classOf[MapWithStateRDDRecord[_,_,_]],
-        classOf[OpenHashMapBasedStateMap[_,_]]
+      classOf[OpenHashMapBasedStateMap[_,_]]
       ))
   }
   def initKafkaParamters(configs: Properties):Map[String,String]={
