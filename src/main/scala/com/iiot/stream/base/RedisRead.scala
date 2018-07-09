@@ -6,24 +6,8 @@ import redis.clients.jedis.JedisPool
 
 /**
   * 此类用于读取本地redis获取预警阈值信息
+  * @author chensi
   */
-
-/*object RedisRead{
-  var redisRead:RedisRead = null
-  def getInstance(sparkPro:Properties) ={
-    if(redisRead==null){
-      synchronized{
-        if(redisRead==null){
-          redisRead = new RedisRead(sparkPro.getProperty("redis.local.port").toInt,sparkPro.getProperty("redis.local.auth"))
-        }
-      }
-    }else{
-      redisRead
-    }
-  }
-
-}*/
-
 object RedisRead {
   @transient lazy  val logger: Logger = Logger.getLogger(RedisRead.getClass)
 

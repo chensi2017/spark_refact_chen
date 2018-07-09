@@ -1,17 +1,11 @@
 package com.iiot.stream.spark
 
-import com.esotericsoftware.kryo.io.Input
 import com.iiot.stream.bean.DPUnion
 import com.iiot.stream.tools.{HTInputDStreamFormat, ZookeeperClient}
-import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.{KafkaManager, SparkConf}
+import org.apache.spark.KafkaManager
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.rdd.{HTMonitorTool, HTStateRddAquireFromCheckPoint}
-
-import scala.collection.mutable.ArrayBuffer
-import scala.reflect.ClassTag
 
 object HTMonitorContext {
   val zkClient = new ZookeeperClient
@@ -47,8 +41,6 @@ object HTMonitorContext {
     }
     d
   }*/
-
-
   def main(args: Array[String]): Unit = {
     if(args.length==0){
       println("ERROR:Please input zookeeper address and checkpoint address!!!")
@@ -62,7 +54,7 @@ object HTMonitorContext {
     val ssc = new StreamingContext(HTMonitorTool.initSparkConf(configs),Duration(Integer.parseInt(configs.getProperty("duration.num"))))
 
     //获取独立测点历史状态数据
-    val initRDD = new HTStateRddAquireFromCheckPoint().get[Long,(String,Long,Int),(Long,String,Long,Boolean)](checkpointAddr,ssc.sparkContext)
+    val initRDD = new HTStateRddAquireFromCheckPoint().get[Long,(Int,Int),(Long,String,Int,Boolean,Int)](checkpointAddr,ssc.sparkContext)
     ssc.checkpoint(checkpointAddr)
 
     //获取配置进行广播
@@ -75,32 +67,27 @@ object HTMonitorContext {
 
     //转换流
     val jsonDStream:DStream[DPUnion] = HTInputDStreamFormat.inputDStreamFormatWithDN(stream)
-    val metricStream = jsonDStream.map(x=>(x.getMetricId,(x.getTs,x.getTid,1)))
+    val metricStream = jsonDStream.map(x=>(x._metricId,(x._ts,x._tid,1)))
     jsonDStream.cache()
     metricStream.cache()
 
-      //统计
-      val statistics=new HTStateStatisticsFewerReduceextends(redisBro)
-      statistics.DPStatistics(jsonDStream)
+    //测点计算
+    val dpCal = new HTUniqueDpCal(redisBro)
+    dpCal.uniqueDpCal(metricStream,initRDD)
 
-      //独立测点计算
-      val dpCal = new HTUniqueDpCal(redisBro)
-      dpCal.uniqueDpCal(metricStream,initRDD)
+    //窗口计算
+    val dpWindowCal = new HTUniqueDpWindowCal(redisBro)
+    dpWindowCal.uniqueDpWindowCalNew(metricStream)
 
+    //监控
+    val monitorOperation =new HTMonitorOperation(sparkBro)
+    monitorOperation.monitor(jsonDStream)
 
-      //窗口计算
-      val dpWindowCal = new HTUniqueDpWindowCal(redisBro)
-      dpWindowCal.uniqueDpWindowCalNew(metricStream)
-
-      //监控
-//      val monitorOperation =new HTMonitorOperation(sparkBro)
-//      monitorOperation.monitor(jsonDStream)
-
-//      提交offset
-      stream.foreachRDD(rdd=>{
-        println("正在提交offset...............")
-        km.updateOffsets(rdd)
-      })
+    //提交offset
+    stream.foreachRDD(rdd=>{
+      println("正在提交offset...............")
+      km.updateOffsets(rdd)
+    })
 
     ssc.start()
     ssc.awaitTermination()

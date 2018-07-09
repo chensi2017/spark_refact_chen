@@ -2,7 +2,7 @@
 package org.apache.spark.streaming.rdd
 import java.util.Properties
 
-import com.iiot.stream.bean.{DPList, DPListWithDN, DPUnion, MetricWithDN}
+import com.iiot.stream.bean.{DPListWithDN, DPUnion, MetricWithDN}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.util.OpenHashMapBasedStateMap
 
@@ -27,10 +27,10 @@ object HTMonitorTool {
 //      .set("spark.shuffle.service.enabled","true")
 //      .set("spark.dynamicAllocation.enabled","true")//动态分配executor
 //      .set("spark.scheduler.mode","FAIR")
-//      .set("spark.streaming.concurrentJobs","5")
+//      .set("spark.streaming.concurrentJobs","3")
 //      .set("spark.scheduler.allocation.file", "/home/hdfs/chen/7_2/pool.xml")
 //      .set("spark.scheduler.allocation.file", "d:\\pool.xml")
-      .registerKryoClasses(Array(classOf[DPList], classOf[DPListWithDN],classOf[Array[DPUnion]],
+      .registerKryoClasses(Array(classOf[DPListWithDN],classOf[Array[DPUnion]],
       classOf[DPUnion],classOf[MetricWithDN],classOf[com.htiiot.resources.utils.DeviceNumber],classOf[Properties],classOf[scala.collection.mutable.WrappedArray.ofRef[_]],classOf[MapWithStateRDDRecord[_,_,_]],
       classOf[OpenHashMapBasedStateMap[_,_]]
       ))

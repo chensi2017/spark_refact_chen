@@ -3,7 +3,6 @@ package org.apache.spark.streaming.rdd
 import java.io.FileNotFoundException
 import java.net.URI
 
-import com.iiot.stream.rdd.EmptyRDD
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.log4j.Logger
@@ -107,9 +106,9 @@ class HTStateRddAquireFromCheckPoint {
           rdd.foreach(x => {})
           logger.info(s"checkpoint地址:${path}|数据恢复成功!!!")
           //clear useless hdfs state dir
-          rddDirPath.remove(count)
-          removeHdfsDir(rddDirPath, checkpointAddr)
-          return rdd
+            rddDirPath.remove(count)
+            removeHdfsDir(rddDirPath, checkpointAddr)
+            return rdd
         } catch {
           case e: Exception => {
             logger.error(s"该checkpoint:${path}地址无状态rdd数据,正在从下个一地址进行恢复!\r\n${e}")

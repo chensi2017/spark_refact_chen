@@ -10,6 +10,10 @@ import org.apache.spark.streaming.dstream.DStream
 
 import scala.collection.mutable
 
+/**
+  * @author chensi
+  * @param redisProBro
+  */
 class HTUniqueDpWindowCal(redisProBro:Broadcast[Properties]) extends Serializable {
   @transient lazy val logger: Logger = Logger.getLogger(classOf[HTUniqueDpWindowCal])
 

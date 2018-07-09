@@ -18,4 +18,12 @@ object DateUtils {
     val sdf = new SimpleDateFormat("yyyyMMdd")
     sdf.format(new Date).equals(sdf.format(new Date(ts)))
   }
+
+  def formateInt2String(date:Int) ={
+    val sec = date/100%100
+    val thir = date%100
+    val secS = if(sec<10) "0"+sec else sec.toString
+    val thirS = if(thir<10)"0"+thir else thir.toString
+    date/10000 + "-" +secS + "-" + thirS
+  }
 }

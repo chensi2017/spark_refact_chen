@@ -1,20 +1,18 @@
 package com.iiot.stream.spark
 
 import java.io.IOException
-import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
-import java.util
 import java.util.{Date, Properties}
 
 import com.htiiot.resources.model.ThingBullet
 import com.iiot.stream.base.{DPConsumerPlugin, RedisRead}
-import com.iiot.stream.bean.{DataPoint, MetricImpl}
+import com.iiot.stream.bean.DPUnion
 import com.iiot.stream.tools.KafkaWriter
 import org.apache.log4j.Logger
 import redis.clients.jedis.{Jedis, Pipeline}
 
 
-class MyThread(name:String,num:Int,arr:Array[ DataPoint],sparkPro:Properties) extends Thread{
+class MyThread(name:String, num:Int, arr:Array[DPUnion], sparkPro:Properties) extends Thread{
   @transient lazy val logger: Logger = Logger.getLogger(classOf[MyThread])
 
   var _name = name
@@ -37,16 +35,7 @@ override def run(){
         //封装metricId
         val startPackMetricId = System.currentTimeMillis()
         arr.foreach(point=>{
-          val deviceNumber = point.getDeviceNumber
-          val ts = point.getTs
-          val metricIdb = deviceNumber.getComponentId
-//          val metricIdb = deviceNumber.getComponentIdLong
-          val bf = ByteBuffer.allocate(8)
-          bf.put(metricIdb)
-          bf.flip
-          val metricId = bf.getLong
-          point.getMetric.asInstanceOf[MetricImpl].setMetricId(metricId)
-          pl.get("event_"+metricId+"_"+point.getMetric.getName)
+          pl.get("event_"+point._metricId+"_"+point._key)
         })
         packMetricId = System.currentTimeMillis() - startPackMetricId
         //pipeline批量获取阈值
@@ -58,7 +47,7 @@ override def run(){
         var i = 0
         arr.foreach(point=>{
           val r = if(list.get(i)==null)null else list.get(i).toString
-          point.getMetric.asInstanceOf[MetricImpl].setThreshold(r)
+          point.threshold = r
           i+=1
         })
         packThresholdTime = System.currentTimeMillis() - startPackThresholdT

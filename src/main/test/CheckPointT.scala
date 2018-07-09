@@ -1,13 +1,10 @@
 package org.apache.spark.streaming.rdd
 import java.util.Properties
 
-import com.iiot.stream.bean.{DPList, DPListWithDN, DPUnion, MetricWithDN}
-import com.iiot.stream.rdd.EmptyRDD
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.streaming.rdd.{HTStateRddAquireFromCheckPoint, MapWithStateRDDRecord}
+import com.iiot.stream.bean.{DPListWithDN, DPUnion, MetricWithDN}
 import org.apache.spark.streaming.util.OpenHashMapBasedStateMap
+import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.{Assert, Test}
-import org.scalatest.FunSuite
 @Test
 class CheckPointT extends Assert{
   def main(args: Array[String]): Unit = {
@@ -17,7 +14,7 @@ class CheckPointT extends Assert{
     println(p)
     val rddP = t.getSpecificRddPath(p)
     println(rddP)*/
-    val sconf = new SparkConf().set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").setAppName("socket").registerKryoClasses(Array(classOf[DPList], classOf[DPListWithDN],classOf[Array[DPUnion]],
+    val sconf = new SparkConf().set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").setAppName("socket").registerKryoClasses(Array(classOf[DPListWithDN],classOf[Array[DPUnion]],
       classOf[DPUnion],classOf[MetricWithDN],classOf[com.htiiot.resources.utils.DeviceNumber],classOf[Properties],classOf[scala.collection.mutable.WrappedArray.ofRef[_]],classOf[MapWithStateRDDRecord[_,_,_]],
       classOf[OpenHashMapBasedStateMap[_,_]]))
     val sc = new SparkContext(sconf)
@@ -31,7 +28,7 @@ class CheckPointT extends Assert{
     println(p)
     val rddP = t.getSpecificRddPath(p)
     println(rddP)*/
-    val sconf = new SparkConf().setMaster("local[4]").set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").setAppName("socket").registerKryoClasses(Array(classOf[DPList], classOf[DPListWithDN],classOf[Array[DPUnion]],
+    val sconf = new SparkConf().setMaster("local[4]").set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").setAppName("socket").registerKryoClasses(Array( classOf[DPListWithDN],classOf[Array[DPUnion]],
       classOf[DPUnion],classOf[MetricWithDN],classOf[com.htiiot.resources.utils.DeviceNumber],classOf[Properties],classOf[scala.collection.mutable.WrappedArray.ofRef[_]],classOf[MapWithStateRDDRecord[_,_,_]],
       classOf[OpenHashMapBasedStateMap[_,_]]))
     val sc = new SparkContext(sconf)

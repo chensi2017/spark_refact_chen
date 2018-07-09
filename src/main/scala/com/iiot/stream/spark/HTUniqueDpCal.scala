@@ -12,62 +12,69 @@ import org.apache.spark.streaming.dstream.DStream
 import redis.clients.jedis.{Jedis, Pipeline}
 
 import scala.collection.mutable
+import scala.collection.mutable.HashMap
 
+/**
+  * @author chensi
+  * @param redisProBro
+  */
 class HTUniqueDpCal(redisProBro: Broadcast[Properties]) extends Serializable {
   @transient lazy val logger: Logger = Logger.getLogger(classOf[HTUniqueDpCal])
 
-  def mapfun = (metricId: Long, value: Option[(Long, String, Int)], state: State[(String, Long, Int)]) => {
+  def mapfun = (metricId: Long, value: Option[(Long, String, Int)], state: State[(Int, Int)]) => {
     val newData = value.get
+    val date = DateUtils.formateTimeStamp(newData._1)
     if (state.exists()) {
       val stateData = state.get
-      if (DateUtils.isToday(newData._1)) {//判断时间戳是否为今天
-        var times = 0l
-        if (DateUtils.formateTimeStamp(newData._1) == stateData._3) {
-          //状态中的时间也是今天
-          val result = state.get()._2 + 1
-          state.update(newData._2, result, stateData._3)
-          times = result
-        } else {
-          //状态中的时间不是今天=>相当于这条数据是今天第一次出现
-          state.update(newData._2, 1l, DateUtils.formateTimeStamp(new Date().getTime))
-          times = 1l
-        }
-        (metricId, newData._2, times, false)
-      } else {
-        //今天之前的数据
-        (metricId, newData._2, 0, false)
+      if(date==stateData._2){
+        val times = stateData._1 + newData._3
+        state.update(times,date)
+        (metricId,newData._2,times,false,date)
+      }else if(date>stateData._2){
+        state.update(1,date)
+        (metricId,newData._2,1,false,date)
+      }else{
+        (metricId,newData._2,-1,false,date)
       }
-    } else {
-      //第一次出现
-      if (DateUtils.isToday(newData._1)) {
-        //is Today
-        state.update(newData._2, 1l, DateUtils.formateTimeStamp(newData._1))
-        (metricId, newData._2, 1, true)
-      } else {
-        //not Today
-        state.update(newData._2, 0, DateUtils.formateTimeStamp(newData._1))
-        (metricId, newData._2, 0, true)
-      }
+    }else{//测点第一次出现
+      state.update(1,date)
+      (metricId,newData._2,1,true,date)
     }
   }
 
-  def uniqueDpCal(metricStream: DStream[(Long, (Long, String, Int))],initRDD:RDD[(Long,(String,Long,Int))]) = {
+  def uniqueDpCal(metricStream: DStream[(Long, (Long, String, Int))],initRDD:RDD[(Long,(Int,Int))]) = {
     val resultStream = metricStream.mapWithState(StateSpec.function(mapfun).initialState(initRDD)).checkpoint(Seconds(100))
     resultStream.foreachRDD(rdd => {
 //      rdd.sparkContext.setLocalProperty("spark.scheduler.pool", "pool_b")
       rdd.foreachPartition(iter => {
-        var uniqueMetricAll = 0l
-        var uniqueMetricToday = 0l
-        val tidDate: mutable.HashMap[String, Long] = new mutable.HashMap
-        val today = DateUtils.formateTimeStamp(new Date().getTime)
+        //1,所有独立测点数
+        var uniqueMetricAll = 0
+        //2,按日期统计独立的测点数
+        val uniqueMetricByDate = new HashMap[Int,Int]
+        //3,按租户和日期统计独立测点数
+        val uniqueMetricByTidDate: mutable.HashMap[Tuple2[Int,String],Int] = new mutable.HashMap
+        //4,统计所有datapoint总数
+        var numTotalDP = 0
+        //5,按租户统计datapoint总数
+        var hashMapByTid= new HashMap[String,Int]
+        //6,按date统计x总数
+        var hashMapByDate= new HashMap[String,Int]
+        //7,按date和tid统计x总数
+        var hashMapByTidDate = new HashMap[Tuple2[String,String],Int]
+
         iter.foreach(it => {
           if (it._4) {
             uniqueMetricAll += 1
           }
           if (it._3 == 1) {
-            uniqueMetricToday += 1
-            tidDate.put(it._2, tidDate.getOrElse(it._2, 0l) + 1l)
+            uniqueMetricByDate.put(it._5,uniqueMetricByDate.getOrElse(it._5,0)+1)
+            uniqueMetricByTidDate.put((it._5,it._2),uniqueMetricByTidDate.getOrElse((it._5,it._2),0)+1)
           }
+          numTotalDP = numTotalDP + 1
+          hashMapByTid.put(it._2, hashMapByTid.getOrElse(it._2, 0) + 1)
+          val dateString = DateUtils.formateInt2String(it._5)
+          hashMapByDate.put(dateString,hashMapByDate.getOrElse(dateString,0)+1)
+          hashMapByTidDate.put((dateString,it._2),hashMapByTidDate.getOrElse((dateString,it._2),0)+1)
         })
         //println(s"独立测点数:${uniqueMetricAll}|||||日期独立测点数:${uniqueMetricToday}||||||${tidDate}")
         //repository to redis
@@ -89,9 +96,21 @@ class HTUniqueDpCal(redisProBro: Broadcast[Properties]) extends Serializable {
         try {
           pl = redisHandle.pipelined()
           pl.incrBy("htstream:unique:dp:total", uniqueMetricAll)
-          pl.hincrBy("htstream:unique:dp:by:date", today.toString, uniqueMetricToday)
-          tidDate.foreach(item => {
-            pl.hincrBy("htstream:unique:dp:by:tenantid:date", today + ":" + item._1, item._2)
+          uniqueMetricByDate.foreach(x=>{
+            pl.hincrBy("htstream:unique:dp:by:date",x._1.toString,x._2)
+          })
+          uniqueMetricByTidDate.foreach(x=>{
+            pl.hincrBy("htstream:unique:dp:by:tenantid:date",x._1._1+":"+x._1._2,x._2)
+          })
+          pl.incrBy("htstream:total:dp",numTotalDP)
+          hashMapByTid.foreach(x=>{
+            pl.incrBy("htstream:total:dp:tenanid:" + x._1, x._2)
+          })
+          hashMapByDate.foreach(x=>{
+            pl.incrBy("htstream:total:dp:date:" + x._1, x._2)
+          })
+          hashMapByTidDate.foreach(x=>{
+            pl.incrBy("htstream:total:dp:tenantid:"+x._1._2+":date:"+x._1._1,x._2)
           })
           pl.sync()
         } catch {
