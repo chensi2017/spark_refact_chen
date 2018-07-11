@@ -3,6 +3,7 @@ package com.iiot.stream.spark
 import com.iiot.stream.bean.DPUnion
 import com.iiot.stream.tools.{HTInputDStreamFormat, ZookeeperClient}
 import org.apache.spark.KafkaManager
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.rdd.{HTMonitorTool, HTStateRddAquireFromCheckPoint}
@@ -55,6 +56,7 @@ object HTMonitorContext {
 
     //获取独立测点历史状态数据
     val initRDD = new HTStateRddAquireFromCheckPoint().get[Long,(Int,Int),(Long,String,Int,Boolean,Int)](checkpointAddr,ssc.sparkContext)
+    initRDD.persist(StorageLevel.MEMORY_ONLY_SER)
     ssc.checkpoint(checkpointAddr)
 
     //获取配置进行广播

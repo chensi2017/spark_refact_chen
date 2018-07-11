@@ -2,13 +2,11 @@ package org.apache.spark.streaming.rdd
 
 import java.io.FileNotFoundException
 import java.net.URI
-
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.log4j.Logger
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.{RDD, ReliableCheckpointRDD}
-
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -32,39 +30,6 @@ class HTStateRddAquireFromCheckPoint {
     * @tparam E
     * @return
     */
-  /*def  get[K,S,E](checkpointAddr: String,sc:SparkContext) = {
-    var rddPath:Path = null
-    try {
-      //get rdd dir path
-      val rddDirPath = getRddPath(checkpointAddr)
-      //get the specific rdd path
-      rddPath = getSpecificRddPath(rddDirPath)
-    }catch {
-      case e:Exception=>logger.error(s"checkpoint地址解析异常,获取状态rdd失败,准备创建空白状态rdd...\r\n${e}")
-    }
-    if(rddPath!=null){
-      val path = rddPath.toString
-      logger.info(s"正在从checkpoint(${path})中获取状态RDD...")
-      new ReliableCheckpointRDD[MapWithStateRDDRecord[K,S,E]](sc,path)
-        .mapPartitions(iter=>{
-          val b = new ArrayBuffer[(K,S)]
-          iter.foreach(x=>{
-            val iter = x.stateMap.getAll()
-            if(!iter.isEmpty){
-              while (iter.hasNext){
-                val item = iter.next()
-                b.+=((item._1,item._2))
-              }
-            }
-          })
-          b.iterator
-        })
-    }else{
-      logger.info("checkpoint中没有状态数据...")
-      EmptyRDD.get[K,S](sc)
-    }
-  }*/
-
   def get[K, S, E](checkpointAddr: String, sc: SparkContext):RDD[(K,S)] = {
     //get rdd dir path list
     var rddDirPath:ArrayBuffer[(FileStatus,Long)] = new ArrayBuffer[(FileStatus, Long)]()

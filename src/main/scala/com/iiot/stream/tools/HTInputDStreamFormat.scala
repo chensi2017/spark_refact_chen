@@ -15,7 +15,7 @@ object HTInputDStreamFormat {
 
   //
   def inputDStreamFormatWithDN(stream: DStream[(String, String)]): DStream[DPUnion] = {
-    val resultJson = stream.map(x => dataTransformWithDN(JSON.parseObject(x._2,classOf[DPListWithDN])))
+    val resultJson = stream.map(x => dataTransformWithDN(ReadJson.readValue(x._2,classOf[DPListWithDN])))
       .flatMap(x => x)
     resultJson
   }
@@ -46,17 +46,17 @@ object HTInputDStreamFormat {
     }
     var result = ArrayBuffer[DPUnion]()
     try {
-      var ts: Long = x.getTs
-      val tid = x.getTid
-      var data = x.getData
+      var ts: Long = x.ts
+      val tid = x.tid.toString
+      var data = x.data
       var dn: String = null
       for (metric <- data) {
-        if (metric.getTs.toString.nonEmpty) {
-          ts = metric.getTs
+        if (metric.ts.toString.nonEmpty) {
+          ts = metric.ts
         }
-        val metricName = metric.getK
-        val metricValue = metric.getV
-        dn = metric.getDN
+        val metricName = metric.k
+        val metricValue = metric.v
+        dn = metric.dn
 
         if ((dn != "0") && (dn != null)) {
           //compId = DeviceNumber.fromBase64String(dn).getMetricIdLong.toString
