@@ -4,6 +4,9 @@ apply plugin: 'idea'
 apply plugin: 'scala'
 apply plugin: 'com.github.johnrengelman.shadow'
 
+def releaseTime() {
+    return new Date().format("yyMMdd", TimeZone.getTimeZone("GMT+08:00"))
+}
 buildscript {
     repositories {
         jcenter()
@@ -34,7 +37,7 @@ sourceCompatibility = 1.7
 
 shadowJar{
     zip64  true
-    baseName='spark-refact'
+    baseName='spark-refact-'+releaseTime()
     classifier = null
     version = null
     exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
@@ -50,15 +53,16 @@ shadowJar{
 }
 
 repositories{
-//    maven { url 'http://124.207.207.21:62125/repository/maven-central/' }
-//    maven { url 'http://124.207.207.21:62125/repository/maven-snapshots/' }
-    maven { url 'http://192.168.0.76:8081/repository/maven-central/' }
-    maven { url 'http://192.168.0.76:8081/repository/maven-snapshots/' }
+    maven { url 'http://124.207.207.21:62125/repository/maven-central/' }
+    maven { url 'http://124.207.207.21:62125/repository/maven-snapshots/' }
+//    maven { url 'http://192.168.0.76:8081/repository/maven-central/' }
+//    maven { url 'http://192.168.0.76:8081/repository/maven-snapshots/' }
     maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url "http://repo.maven.apache.org/maven2" }
     mavenCentral()
     mavenLocal()
 }
+
 
 dependencies{
     compile group: 'com.carrotsearch', name: 'java-sizeof', version: '0.0.5'//计算对象在内存中占用大小
