@@ -43,7 +43,7 @@ class HTUniqueDpCal(redisProBro: Broadcast[Properties]) extends Serializable {
   }
 
   def uniqueDpCal(metricStream: DStream[(Long, (Long, String, Int))],initRDD:RDD[(Long,(Int,Int))]) = {
-    val resultStream = metricStream.mapWithState(StateSpec.function(mapfun).initialState(initRDD)).checkpoint(Seconds(100))
+    val resultStream = metricStream.mapWithState(StateSpec.function(mapfun).initialState(initRDD))
     resultStream.foreachRDD(rdd => {
 //      rdd.sparkContext.setLocalProperty("spark.scheduler.pool", "pool_b")
       rdd.foreachPartition(iter => {
@@ -114,7 +114,7 @@ class HTUniqueDpCal(redisProBro: Broadcast[Properties]) extends Serializable {
           })
           pl.sync()
         } catch {
-          case e: Exception => logger.error(e)
+          case e: Exception => logger.error(e,e)
         } finally {
           //release redis resource
           if (pl != null) {

@@ -53,22 +53,22 @@ shadowJar{
 }
 
 repositories{
-    maven { url 'http://124.207.207.21:62125/repository/maven-central/' }
-    maven { url 'http://124.207.207.21:62125/repository/maven-snapshots/' }
-//    maven { url 'http://192.168.0.76:8081/repository/maven-central/' }
-//    maven { url 'http://192.168.0.76:8081/repository/maven-snapshots/' }
+    maven { url 'http://192.168.0.76:8081/repository/maven-central/' }
+    maven { url 'http://192.168.0.76:8081/repository/maven-snapshots/' }
     maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url "http://repo.maven.apache.org/maven2" }
     mavenCentral()
     mavenLocal()
+    maven { url 'http://124.207.207.21:62125/repository/maven-central/' }
+    maven { url 'http://124.207.207.21:62125/repository/maven-snapshots/' }
 }
 
 
 dependencies{
     compile group: 'com.carrotsearch', name: 'java-sizeof', version: '0.0.5'//计算对象在内存中占用大小
-    compile(group: 'com.htiiot.store', name: 'store-shared', version:'0.0.1-SNAPSHOT') {
-        exclude(group: 'com.fasterxml.jackson.core',module: 'jackson-databind')
-    }
+//    compile(group: 'com.htiiot.store', name: 'store-shared', version:'0.0.1-SNAPSHOT') {
+//        exclude(group: 'com.fasterxml.jackson.core',module: 'jackson-databind')
+//    }
     compile (group: 'com.iiot.alarm', name: 'alarm-shared', version:'992.0-SNAPSHOT')
             {
                 exclude(group: 'com.fasterxml.jackson.core',module: 'jackson-databind')
@@ -77,15 +77,15 @@ dependencies{
             {
                 exclude(group: 'com.fasterxml.jackson.core',module: 'jackson-databind')
             }
-    compile( group: 'com.htiiot.stream', name: 'stream-shared', version:'0.0.1-SNAPSHOT'){
-        exclude(group: 'com.fasterxml.jackson.core',module: 'jackson-databind')
-    }
+//    compile( group: 'com.htiiot.stream', name: 'stream-shared', version:'0.0.1-SNAPSHOT'){
+//        exclude(group: 'com.fasterxml.jackson.core',module: 'jackson-databind')
+//    }
     compile (group: 'com.htiiot.resources', name: 'resources-shared', version:'0.0.1-SNAPSHOT')
             {
                 exclude(group: 'com.fasterxml.jackson.core',module: 'jackson-databind')
             }
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.5.2'
-    compile group: 'com.alibaba', name: 'fastjson', version:'1.2.31'
+//    compile group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.5.2'
+//    compile group: 'com.alibaba', name: 'fastjson', version:'1.2.31'
     compile (group: 'org.apache.spark', name: 'spark-core_2.10', version:'2.1.0')
     compile (group: 'org.apache.spark', name: 'spark-streaming_2.10', version:'2.1.0')
     compile (group: 'org.apache.spark', name: 'spark-streaming-kafka_2.10', version:'1.6.3')

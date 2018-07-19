@@ -20,7 +20,7 @@ class ZookeeperClient {
         }
       })
     } catch {
-      case e: Exception => logger.error("zk lost")
+      case e: Exception => logger.error("zk lost",e)
     }
     zk
   }

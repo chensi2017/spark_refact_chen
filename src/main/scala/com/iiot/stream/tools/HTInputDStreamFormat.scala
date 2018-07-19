@@ -69,13 +69,13 @@ object HTInputDStreamFormat {
       }
     } catch {
       case e: NullPointerException => {
-        logger.error("NullPointer Error" + e.getMessage)
+        logger.error("NullPointer Error" + e.getMessage,e)
       }
       case e: NumberFormatException => {
-        logger.error("NumberFormat Error" + e.getMessage)
+        logger.error("NumberFormat Error" + e.getMessage,e)
       }
       case e: Exception => {
-        logger.error("Unknown Error" + e.getMessage)
+        logger.error("Unknown Error" + e.getMessage,e)
       }
     }
     //    logger.info("the result string is :" + result)

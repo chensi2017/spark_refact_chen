@@ -17,22 +17,6 @@ import scala.collection.mutable
 class HTUniqueDpWindowCal(redisProBro:Broadcast[Properties]) extends Serializable {
   @transient lazy val logger: Logger = Logger.getLogger(classOf[HTUniqueDpWindowCal])
 
-  /*def clearRedis(){
-    var jedis = RedisOperation.getInstance(redisProBro.value).getResource()
-    jedis.del("htstream:unique:dp:by:tenantid:window","htstream:unique:dp:total:by:window")
-    try{
-      if(jedis!=null){
-        jedis.close()
-      }
-    }catch {
-      case e:Exception=>logger.error(e)
-    }
-    finally
-    {
-      jedis = null
-    }
-  }*/
-
   def updateToRedis(uniqueMetric:Long,tidmetric:mutable.HashMap[String,Long]): Unit ={
     var j = RedisOperation.getInstance(redisProBro.value).getResource()
     var pl = j.pipelined()

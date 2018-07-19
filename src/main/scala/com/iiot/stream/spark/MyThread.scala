@@ -68,7 +68,7 @@ override def run(){
         }
         judgeTime = System.currentTimeMillis() - startJudgeT
       }catch {
-        case e:Exception=>logger.error(e)
+        case e:Exception=>logger.error(e,e)
       }
       finally {
         try {
@@ -76,7 +76,7 @@ override def run(){
           if(redisHandle!=null) redisHandle.close()
         } catch {
           case e: IOException => {
-            logger.error("IO Error" + e.getMessage)
+            logger.error(s"IO Error ${e.getMessage}",e)
           }
         }
       }

@@ -52,9 +52,9 @@ class HTMonitorOperation(sparkProBro:Broadcast[Properties]) extends Serializable
         }
       }
     }catch {
-      case e:IllegalThreadStateException =>logger.error("IllegalThreadState Error"+ e.getMessage)
-      case e:ArrayIndexOutOfBoundsException =>logger.error("ArrayIndexOutOfBounds Error"+ e.getMessage)
-      case e:Exception =>logger.error("Unknown Error"+ e.getMessage)
+      case e:IllegalThreadStateException =>logger.error("IllegalThreadState Error"+ e.getMessage,e)
+      case e:ArrayIndexOutOfBoundsException =>logger.error("ArrayIndexOutOfBounds Error"+ e.getMessage,e)
+      case e:Exception =>logger.error("Unknown Error"+ e.getMessage,e)
     }
     val endAllThread = System.currentTimeMillis() - startAllThread
     val endT = System.currentTimeMillis()

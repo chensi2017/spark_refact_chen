@@ -10,6 +10,10 @@ import org.apache.spark.streaming.kafka.{HTKafkaUtils, HasOffsetRanges, KafkaClu
 import scala.reflect.ClassTag
 import scala.util.control.Breaks.breakable
 
+/**
+  * @author chensi
+  * @param kafkaParams
+  */
 class KafkaManager(val kafkaParams:Map[String,String]) extends Serializable {
   private var kc = new KafkaCluster(kafkaParams)
 
@@ -21,10 +25,10 @@ class KafkaManager(val kafkaParams:Map[String,String]) extends Serializable {
   KD <: Decoder[K]: ClassTag,
   VD <: Decoder[V]: ClassTag](ssc: StreamingContext, topics: Set[String]) =  {
     val groupId = kafkaParams.get("group.id").get
-    // 在zookeeper上读取offsets前先根据实际情况更新offsets
+    // 在kafka上读取offsets前先根据实际情况更新offsets
     setOrUpdateOffsets(topics, groupId)
 
-    //从zookeeper上读取offset开始消费message
+    //从kafka上读取offset开始消费message
     val messages = {
       val partitionsE = kc.getPartitions(topics)
       if (partitionsE.isLeft)
@@ -53,9 +57,7 @@ class KafkaManager(val kafkaParams:Map[String,String]) extends Serializable {
       if(partitionsE.isLeft) {
         throw new SparkException(s"get kafka partition failed: ${partitionsE.left.get}")
       }
-
       val partitions = partitionsE.right.get
-
       val consumerOffsetE = kc.getConsumerOffsets(groupId,partitions,1)
       //以下是测试代码
       consumerOffsetE.right.get.foreach(x=>{
@@ -63,7 +65,7 @@ class KafkaManager(val kafkaParams:Map[String,String]) extends Serializable {
       })
       breakable {
         consumerOffsetE.right.get.foreach(x => {
-          println(s"${x._1}:::::${x._2}")
+          //if not consumed,the offsets is -1
           if (x._2 == -1) {
             hasConsmed = false
             import scala.util.control.Breaks._
@@ -71,10 +73,8 @@ class KafkaManager(val kafkaParams:Map[String,String]) extends Serializable {
           }
         })
       }
-//      println(consumerOffsetE.isLeft)
-//      if(consumerOffsetE.isLeft)hasConsmed=false
       if(hasConsmed){//消费过
-        println("该groupid存在.....")
+        println(s"groupid:${groupId}消费过.....")
         /**
           * 如果streaming程序执行的时候出现kafka.common.OffsetOutOfRangeException，
           * 说明zk上保存的offsets已经过时了，即kafka的定时清理策略已经将包含该offsets的文件删除。
@@ -135,6 +135,7 @@ class KafkaManager(val kafkaParams:Map[String,String]) extends Serializable {
 
   /**
     * 更新zookeeper/kafka上的消费offsets
+    * VersionApi:0->kafka;1->zookeeper
     * @param rdd
     */
   def updateOffsets(rdd: RDD[(String, String)]) : Unit = {

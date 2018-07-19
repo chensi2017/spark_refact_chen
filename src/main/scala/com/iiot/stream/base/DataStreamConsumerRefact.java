@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class DataStreamConsumerRefact {
-    private static Logger logger = LoggerFactory.getLogger(com.iiot.alarmimpl.DataStreamConsumer.class);
+    private static Logger logger = LoggerFactory.getLogger(DataStreamConsumerRefact.class);
 
     public static boolean subCheckDataPoint(double metricValue, String op, double mindb, double maxdb) {
         if (!"=".equals(op) && !"0".equals(op)) {

@@ -10,38 +10,6 @@ import org.apache.spark.streaming.rdd.{HTMonitorTool, HTStateRddAquireFromCheckP
 
 object HTMonitorContext {
   val zkClient = new ZookeeperClient
-
-  /*def getPath(system: FileSystem, path: Path) ={
-
-  }
-
-  def objectFileKryo[T](path: String, sc: SparkConf)(implicit ct: ClassTag[T]) = {
-    val kryoSerializer = new KryoSerializer(sc)
-    val hadoopConf = new org.apache.hadoop.conf.Configuration()
-    val hdfs = FileSystem.get(hadoopConf)
-    val paths = getPath(hdfs, new Path(path))
-    val d = paths.flatMap { p =>
-    {
-      val r = hdfs.open(p)
-      var by = ArrayBuffer[Byte]()
-      while (r.available() > 0) {
-        val b = r.readByte()
-        by += (b)
-      }
-      val kryo = kryoSerializer.newKryo()
-      val input = new Input()
-      input.setBuffer(by.toArray)
-      val array = ArrayBuffer[T]()
-      while (input.available() > 0) {
-        val data = kryo.readClassAndObject(input)
-        val dataObject = data.asInstanceOf[T]
-        array += dataObject
-      }
-      array
-    }
-    }
-    d
-  }*/
   def main(args: Array[String]): Unit = {
     if(args.length==0){
       println("ERROR:Please input zookeeper address and checkpoint address!!!")
